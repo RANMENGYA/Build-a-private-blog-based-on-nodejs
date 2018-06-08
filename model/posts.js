@@ -50,7 +50,7 @@ exports.find = (id,cb) => {
     sql += ' FROM posts AS p LEFT JOIN users AS u ON p.uid = u.id WHERE p.id = ?';
     // 根据 id 点击页面的查看详情 获取到的
     db.query(sql,[id],(err,rows)=>{
-      console.log(rows);
+      // console.log(rows);
       if(!err) return cb(null,rows[0]);
       cb({ msg: "数据库操作异常" });
     })
@@ -87,6 +87,57 @@ exports.findAllUserCount = (userId,cb) => {
   });
 };
 
+// 插入
+exports.save = (posts,cb)=>{
+  let sql = 'INSERT INTO posts SET ?';
+  db.query(sql,posts,(err)=>{
+    if(!err) return cb(null);
+    cb({msg:'保存文章信息失败'});
+  })
+}
 
+// 查询后台文章列表
+/* 
+  posts uid用户id
+  posts title文章标题 模糊查询 LIKE 模糊查询 %1 以1开头 %1 以1结尾 %1%包含1
+*/
+exports.findAllForAdmin = (posts,cb)=>{
+  let sql = "SELECT id,title FROM posts WHERE uid=? AND status=0";
+  if(posts.title){
+    // 模糊查询会影响查询速度 所以判断用户有没有输入
+    sql += ' AND title LIKE "%'+posts.title+'%"';
+  }
+  db.query(sql,[posts.uid],(err,rows)=>{
+    if(!err) return cb(null,rows);
+    cb({msg:'查询文章信息失败'});
+  })
+}
 
-
+// 删除
+exports.delete = (id,cb)=>{
+  // 硬删除 就是真的从数据库删除
+  // let sql = 'DELETE FROM posts WHERE id=' +id;
+  // 软删除 通过更改状态 status
+  let sql = "UPDATE posts SET status = 1 WHERE id=" + id;
+  db.query(sql,(err)=>{
+    if (!err) return cb(null);
+    cb({ msg: "删除文章信息失败" });
+  })
+}
+// 编辑
+exports.update = (posts,cb)=>{
+  // 修改 
+  let sql = "UPDATE posts SET ? WHERE id=" + posts.id;
+  db.query(sql,posts,(err)=>{
+    if (!err) return cb(null);
+    cb({ msg: "删除文章信息失败" });
+  })
+}
+// 查询
+exports.findPosts = (id,cb)=>{
+  let sql = "SELECT id,title,brief,content FROM posts WHERE id=" + id;
+  db.query(sql,(err,rows)=>{
+    if (!err) return cb(null,rows[0]);
+    cb({ msg: "查询文章信息失败" });
+  })
+}

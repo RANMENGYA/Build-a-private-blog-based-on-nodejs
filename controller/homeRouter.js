@@ -1,3 +1,5 @@
+
+
 const express = require("express");
 // 引入posts文件
 const postdb = require("../model/posts");
@@ -51,6 +53,7 @@ router.get("/center", (req, res) => {
   let userId = req.query.id;
   let pageNow = req.query.page || 1;//页码
   usersdb.find(userId, (err, users) => {
+    // console.log(users)
     if (err) return res.send(err);
     postdb.findAllUserPage(userId,pageNow,pageSize,(err,rows)=>{
       if (err) return res.send(err);
@@ -79,15 +82,48 @@ router.get("/login", (req, res) => {
 });
 //登录处理
 router.post("/login", (req, res) => {
-  res.render("home/login.html");
+  // 效验 post数据就是users
+  if (!req.body.email) return res.json({ msg: "请输入邮箱地址" });
+  if (!req.body.pass) return res.json({ msg: "请输入密码" });
+  usersdb.auth(req.body,(err,users)=>{
+    if(!err){
+    // 登录成功 记录session.users = users
+    // global.users公用的数据 需要给模板使用
+    // req.session.users判断用户
+    global.users = req.session.users = users;
+      // 响应客户端成功的信息
+      res.json({success:true})
+    }else{
+      res.json(err);
+    }
+
+  })
 });
 //注册页面
 router.get("/register", (req, res) => {
   res.render("home/register.html");
 });
+// 退出登录
+router.get("/logout", (req, res) => {
+  global.users = req.session.users = null;
+  res.redirect('/')//重定向
+});
 //注册信息提交
 router.post("/register", (req, res) => {
-  res.render("home/register.html");
+  // 1.存储数据库的接口
+  // 前端数据要跟后端保持一致-post提交的数据就是users {name email pass repass}
+  // 效验
+    if (!req.body.name) return res.json({ msg: "请输入用户名" });
+    if (!req.body.email) return res.json({ msg: "请输入邮箱地址" });
+    if (!req.body.pass) return res.json({ msg: "请输入密码" });
+    if (!req.body.repass) return res.json({ msg: "请输入确认密码" });
+    if (req.body.pass != req.body.repass) return res.json({
+        msg: "密码不一致"
+      });
+    usersdb.save(req.body, err => {
+      if (!err) return res.json({ success: true });
+      res.json(err);
+    });
 });
 //加入我们
 router.get("/join", (req, res) => {

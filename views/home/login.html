@@ -9,12 +9,12 @@
         <form action="">
             <ul>
                 <li>
-                    <label for="">邮　箱:</label>
-                    <input type="text">
+                    <label for="email">邮　箱:</label>
+                    <input type="text" id="email" name="email">
                 </li>
                 <li>
-                    <label for="">密　码:</label>
-                    <input type="password">
+                    <label for="pass">密　码:</label>
+                    <input type="password" id="pass" name="pass">
                 </li>
                 <li>
                     <label for=""></label>
@@ -26,3 +26,26 @@
     </div>
 </div>
 {{/block}}
+{{block 'script'}}
+<script type="text/javascript" src="/node_modules/jquery/dist/jquery.min.js"></script>
+<script>
+    $('form').on('submit', function (e) {
+        console.log(1111)
+        e.preventDefault();
+        // 异步提交
+        $.ajax({
+            type: 'post', url: '/login',
+            data: $('form').serialize(),
+            dataType: 'json',
+            success: (data) => {
+                if (data.success) {
+                    alert('登录成功');
+                    location.href = '/';
+                } else {
+                    alert(data.msg);
+                }
+            }
+        })
+    })
+
+</script> {{/block}}

@@ -17,7 +17,7 @@
                     <img onerror="this.src='/public/uploads/avatar/default.png'" src="{{$value.avatar||'/public/uploads/avatar/default.png'}}" alt="">
                     <a href="/center?id={{$value.id}}">{{$value.name}}</a>
                     <!-- 时间格式化 -->
-                    <span>{{$imports.moment($value.time).format('YYYY-MM-DD HH:mm:ss')}}</span>
+                    <span>{{$imports.moment.moment($value.time).format('YYYY-MM-DD HH:mm:ss')}}</span>
                 </div>
                 <!-- 博客概览 -->
                 <div class="post-brief">

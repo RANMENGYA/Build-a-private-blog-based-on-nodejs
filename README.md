@@ -6,7 +6,7 @@
 ## 起步
 ```shell
 # 下载静态页面
-git clone git@github.com:zhousg/node-blog.git
+git clone -b static git@github.com:zhousg/node-blog.git
 
 # 进入项目目录
 cd node-blog
@@ -83,6 +83,7 @@ git checkout -b heima44
 - multer 上传文件
 - moment 时间格式化
 - md5 加密
+- express-session
 
 
 
@@ -159,4 +160,117 @@ app.set('view options', {
 //在模板内使用
 //<span>{{$imports.moment($value.time).format('YYYY-MM-DD hh:mm:ss')}}</span>
 ```
+
+## express-session
+
+安装：`npm i express-session`
+
+配置：
+
+```js
+const session = require('express-session');
+app.use(session({
+    //加密字符
+    secret: 'node-blog',
+    //是否重新保存session
+    resave: false,
+    //是否在和服务器建立连接的时候初始化session
+    saveUninitialized: true
+}));
+```
+
+使用：
+
+```js
+//记录session
+req.session.users = users;
+//清除session
+req.seesion.users = null;
+//校验登录状态
+const checkLoginMiddlewareFuc = function (req, res, next) {
+    //未登录
+    if (!req.session.users) {
+        return res.redirect('/login');
+    }
+    next();
+};
+app.use('/admin', checkLoginMiddlewareFuc, adminRouter);
+```
+
+
+
+## 模板内使用外部动态变量
+
+```js
+global.users = {name:'123'};
+
+imports.getUsers = function(){
+ 	return global.users; 
+}
+
+```
+
+
+
+## 后台路由设计
+
+| 路由路径             | 请求方式 | 备注        |
+| ---------------- | ---- | --------- |
+| /admin           | get  | 管理首页      |
+| /admin/blog/push | get  | 添加文章页面    |
+| /admin/blog/push | post | 添加文章      |
+| /admin/blog/list | get  | 查询自己的所有文章 |
+| /admin/blog/edit | get  | 修改文章页面    |
+| /admin/blog/edit | post | 修改文章      |
+| /admin/repass    | get  | 修改密码页面    |
+| /admin/repass    | post | 修改密码      |
+| /admin/settings  | get  | 个人信息设置页面  |
+| /admin/settings  | post | 个人信息设置    |
+| /admin/blog/del  | get  | 删除博客      |
+
+
+
+## 使用multer的包处理文件的上传
+
+安装：`npm i multer`
+
+配置：
+
+```js
+/*配置磁盘的存储信息*/
+const storage = multer.diskStorage({
+    /*目录*/
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../public/uploads/avatar'));
+    },
+    /*名称*/
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+/*返回上传对象*/
+const upload = multer({storage});
+router.post('/upload', upload.single('avatar'), (req, res) => {
+    res.send('/public/uploads/avatar/' + req.file.filename);
+});
+```
+
+
+
+## 总结
+
+- 体验node的执行过程
+- node.js中的javascript和浏览器中的异同
+- ES6 基础
+- fs模块
+- 模块的导入和导出
+- npm
+- http模块
+- 留言板例子
+
+提高：
+
+express
+
+....
 

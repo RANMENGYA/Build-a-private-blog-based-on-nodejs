@@ -21,8 +21,13 @@
             </nav>
             <!-- 注册/登录 -->
             <div class="extra">
+                {{if $imports.moment.getUsers()}}
+                <a href="/admin">博客管理</a>
+                <a href="/logout">退出</a>
+                {{else}}
                 <a href="/register">注册</a>
                 <a href="/login">登录</a>
+                {{/if}}
             </div>
         </div>
     </header>
